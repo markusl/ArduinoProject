@@ -6,7 +6,6 @@
 boolean useHttp = false;
 boolean useGsm = true;
 boolean useKeypad = false;
-boolean useDhcp = false;
 
 void setup()
 {
@@ -18,7 +17,7 @@ void setup()
     initializeGsm();
     
   if(useHttp)
-    initializeEthernet(useDhcp);
+    initializeEthernet();
 }
 
 void loop()
