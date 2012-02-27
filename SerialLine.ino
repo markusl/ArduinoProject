@@ -14,6 +14,13 @@ void intializeSerial()
   Serial.begin(9600);
 }
 
+void _reportMem()
+{
+  String s = "Memory free: ";
+  s += freeMemory();
+  debug(s);
+}
+
 void _serialHandleLine()
 {
   String s = _serialBuffer;
@@ -23,13 +30,20 @@ void _serialHandleLine()
     debug(_serialBuffer + 3);  
     gsmSerial.println(_serialBuffer + 3);
   }
-  _serialBuffer[0] = 0;
+  else if(s.indexOf("mem") == 0)
+  {
+    _reportMem();
+  }
 }
 
 void _serialReadNextLine()
 {
-  Serial.readBytesUntil('\n', _serialBuffer, _maxSerialBuffer);  
-  _serialHandleLine();
+  byte charsRead = Serial.readBytesUntil('\n', _serialBuffer, _maxSerialBuffer);  
+  if(charsRead)
+  {
+    _serialBuffer[charsRead] = 0; // Terminate string
+    _serialHandleLine();
+  }
 }
 
 void serialPollContent()

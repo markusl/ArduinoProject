@@ -3,3 +3,24 @@ Arduino Project
 
 The goal for this arduino project is to create a device
 for controlling the status of LCD screen
+
+Notes:
+
+Use avr-size command to check used RAM size.
+
+	>avr-size ArduinoProject.cpp.elf
+	   text    data     bss     dec     hex filename
+	  20032     954     409   21395    5393 ArduinoProject.cpp.elf
+
+Sum of DATA and BSS is 954+409=1363. This needs to be smaller than Arduino board's RAM size.
+
+In "SoftwareSerial.h", you need to change the default buffer size
+from 64 to 128 to enable reading complete SMS messages.
+
+    #define _SS_MAX_RX_BUFF 64 // RX buffer size
+	
+
+AT command reference
+ * http://garden.seeedstudio.com/images/a/a8/SIM900_AT_Command_Manual_V1.03.pdf
+SIMCOM SIM900 HD V1.05 reference
+ * http://garden.seeedstudio.com/images/e/e3/SIM900_HD_V1.05.pdf

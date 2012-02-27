@@ -1,11 +1,10 @@
 /*
   ArduinoProject
- 
  */
 
-boolean useHttp = false;
-boolean useGsm = true;
-boolean useKeypad = false;
+const boolean useHttp = false;
+const boolean useGsm = true;
+const boolean useKeypad = false;
 
 void setup()
 {
