@@ -21,24 +21,40 @@ void _writePinCode()
   _gsmReadBytesOrDisplayError(4); // AT\r\n
 }
 
+void _receiveTextMessage()
+{
+  debug("RecvSms: NOT IMPLEMENTED");
+}
+
 void _gsmSerialHandleLine()
 {
   String s = _gsmBuffer;
-  if(s.length() > 0)
-    debug(_gsmBuffer);
+  debug(s);
+
   if(s.indexOf("+CPIN: SIM PIN") != -1)
   {
     _writePinCode();
   }
-  _gsmBuffer[0] = 0;
+  else if(s.indexOf("+CMTI:") != -1) // +CMTI: "SM",1
+  {
+    _receiveTextMessage();
+  }
+  else
+  {
+    // Currently unhandled!
+  }
 }
  
 void gsmPollContent()
 {
   if(gsmSerial.available())
   {
-    gsmSerial.readBytesUntil('\n', _gsmBuffer, _gsmMaxBuffer);  
-    _gsmSerialHandleLine();
+    byte charsRead = gsmSerial.readBytesUntil('\n', _gsmBuffer, _gsmMaxBuffer);
+    if(charsRead)
+    {
+      _gsmBuffer[charsRead] = 0; // Terminate string
+      _gsmSerialHandleLine();
+    }
   }
 }
 
