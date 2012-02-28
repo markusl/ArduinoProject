@@ -1,7 +1,10 @@
-/** 
- * 
- * Ethernet shield attached to pins 10, 11, 12, 13
+/*
+ * ArduinoProject HTTP/Twitter control.
  *
+ * Functionality to receive updates via fetching Twitter feed.
+ *
+ * @date 02/2012
+ * @author Markus Lindqvist
  */
 
 #include <SPI.h>
@@ -15,7 +18,7 @@ String _latestLine = "";
 const int _maxLength = 256; // max length to store
 const int _maxTweet = 150;
 String latestTweet = "<nutin>";
-
+int _latestTweetUpdate = 0;
 
 // Settings for local tryouts
 IPAddress ip(192, 168, 0, 17);
@@ -25,6 +28,7 @@ IPAddress subnet(255, 255, 255, 0);
 // Newer Ethernet shields have a MAC address printed on a sticker on the shield
 byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
+/* Ethernet shield attached to pins 10, 11, 12, 13 */
 EthernetClient client;
 
 /** Initializes attached ethernet shield, tries DHCP and
@@ -139,7 +143,10 @@ boolean _readContent(boolean readLatestTweet)
 void httpPollContent()
 {
   _doRequest(_twitterServerName, _twitterFetchUrl);
-  _readContent(true);
+  if(_readContent(true))
+  {
+    _latestTweetUpdate = millis()/1000;
+  }
   debug("disconnecting.");
   client.stop();
 }

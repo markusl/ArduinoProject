@@ -1,17 +1,31 @@
-
-#include <SoftwareSerial.h>
+/*
+ * ArduinoProject GPRS Shield control.
+ *
+ * Initializes the GPRS Shield when it's turned on
+ * and handles received SMS messages.
+ *
+ * @date 02/2012
+ * @author Markus Lindqvist
+ */
  
+#include <SoftwareSerial.h>
+
+/** What we need is an Arduino Sketch running inside
+  * the ATmega328P that would emulate a second serial
+  * port (UART) using software on the digital pins D8 and D7
+  * See: http://www.seeedstudio.com/wiki/GPRS_Shield#Step_1:_Creating_a_test_setup_for_the_GPRS_Shield */
 SoftwareSerial gsmSerial(7, 8);
+
 const int _gsmTimeout = 30;
 const int _gsmMaxBuffer = 128;
 char _gsmBuffer[_gsmMaxBuffer] = "";
- 
+
+const int _gprsShieldFactoryDefaultBps = 19200;
+
 void initializeGsm()
 {
   debug("initializeGsm");
-  gsmSerial.begin(19200);               // the GPRS baud rate
-
-//  _gsmBuffer.reserve(_gsmMaxBuffer);
+  gsmSerial.begin(_gprsShieldFactoryDefaultBps);
 }
 
 void _writePinCode()

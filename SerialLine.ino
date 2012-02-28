@@ -1,11 +1,21 @@
+/*
+ * ArduinoProject Serial Line control.
+ *
+ * Provides debug logging functionality.
+ * Provides functionality to read helper commands from serial.
+ *
+ * @date 02/2012
+ * @author Markus Lindqvist
+ */
 
-int debugLevel = 1;
+const int _debugLevel = 1;
+
 const int _maxSerialBuffer = 128;
 char _serialBuffer[_maxSerialBuffer] = "";
 
 void debug(String line)
 {
-  if(debugLevel)
+  if(_debugLevel)
     Serial.println("dbg>" + line);
 }
 

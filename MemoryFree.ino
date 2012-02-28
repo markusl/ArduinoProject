@@ -1,4 +1,11 @@
-/** Original work at http://www.arduino.cc/playground/Code/AvailableMemory */
+/*
+ * ArduinoProject memory diagnostics.
+ *
+ * Original work at http://www.arduino.cc/playground/Code/AvailableMemory 
+ *
+ * @date Unknown
+ * @author Matthew Murdoch
+ */
 
 #if (ARDUINO >= 100)
 #include <Arduino.h>
