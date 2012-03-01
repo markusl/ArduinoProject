@@ -35,9 +35,28 @@ void _writePinCode()
   _gsmReadBytesOrDisplayError(4); // AT\r\n
 }
 
-void _receiveTextMessage()
+void _receiveTextMessage(String &line)
 {
-  debug("RecvSms: NOT IMPLEMENTED");
+  int idx = line.indexOf(",");
+  String index = line.substring(idx+1, line.length()-2);
+  gsmSerial.print("AT+CMGR=" + index + "\r");
+}
+
+boolean _is_new_sms(const String &line)
+{
+  return line.indexOf("+CMTI") != -1;
+}
+
+boolean _is_sms(const String &line)
+{
+  return line.indexOf("+CMGR") != -1;
+}
+
+boolean _print_sms(String &line)
+{
+  int idx = line.substring(10).indexOf("\n");
+  String content = line.substring(idx);
+  debug("Got sms with content: " + content);
 }
 
 void _gsmSerialHandleLine()
@@ -49,9 +68,13 @@ void _gsmSerialHandleLine()
   {
     _writePinCode();
   }
-  else if(s.indexOf("+CMTI:") != -1) // +CMTI: "SM",1
+  else if(_is_new_sms(s)) // +CMTI: "SM",1
   {
-    _receiveTextMessage();
+    _receiveTextMessage(s);
+  }
+  else if(_is_sms(s)) // +CMTI: "SM",1
+  {
+    _print_sms(s);
   }
   else
   {
