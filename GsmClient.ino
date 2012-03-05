@@ -31,7 +31,7 @@ void initializeGsm()
 void _writePinCode()
 {
   gsmSerial.write("AT+CPIN=7201\r");
-  debug("PIN code written");
+  debug2("PIN code written");
   _gsmReadBytesOrDisplayError(4); // AT\r\n
 }
 
