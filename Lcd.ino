@@ -21,8 +21,9 @@ void initializeLcd()
   debug2("Initializing device");
 }
 
-void lcdPrintString(String &line)
+void lcdPrintString(const String &line)
 {
+  lcd.clear();
   lcd.setCursor(0, 1); // Go to start of second row
   lcd.print(line);
 }

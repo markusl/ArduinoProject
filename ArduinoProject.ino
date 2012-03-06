@@ -13,10 +13,15 @@ const boolean useHttp = false;
 const boolean useGsm = true;
 // Whether to use physical keypad for controlling the device
 const boolean useKeypad = false;
+const boolean useLcd = true;
 
 void setup()
 {
+  if(useLcd)
+    initializeLcd();
+  
   intializeSerial();
+
   if(useKeypad)
     initializeKeypad();
     

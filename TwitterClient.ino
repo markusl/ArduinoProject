@@ -156,5 +156,6 @@ boolean _checkNetworkIsUp()
   boolean result = _doRequest(_twitterServerName, "GET / HTTP/1.1");
   client.flush();
   client.stop();
+  return result;
 }
 

@@ -13,10 +13,19 @@ const int _debugLevel = 1;
 const int _maxSerialBuffer = 128;
 char _serialBuffer[_maxSerialBuffer] = "";
 
-void debug(String line)
+void debug(const String &line)
 {
   if(_debugLevel)
     Serial.println("dbg>" + line);
+}
+
+void debug2(const String &line)
+{
+  if(_debugLevel)
+  {
+    debug(line);
+    lcdPrintString(line);
+  }
 }
 
 void intializeSerial()

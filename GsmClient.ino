@@ -8,7 +8,7 @@
  * @author Markus Lindqvist
  */
  
-#include <SoftwareSerial.h>
+#include <SoftwareSerial.h> // Remember to patch!
 
 /** What we need is an Arduino Sketch running inside
   * the ATmega328P that would emulate a second serial
@@ -28,53 +28,83 @@ void initializeGsm()
   gsmSerial.begin(_gprsShieldFactoryDefaultBps);
 }
 
+void _deviceSettings()
+{
+  gsmSerial.write("AT+CNMI=3,1\r"); // Expect +CMTI when new message arrives
+  _gsmReadBytesOrDisplayError(4); // OK\r\n
+  gsmSerial.write("AT+CMGF=1\r"); // Text mode
+  _gsmReadBytesOrDisplayError(4); // OK\r\n
+}
+
 void _writePinCode()
 {
   gsmSerial.write("AT+CPIN=7201\r");
   debug2("PIN code written");
-  _gsmReadBytesOrDisplayError(4); // AT\r\n
+  delay(200);
+  _gsmReadBytesOrDisplayError(4); // OK\r\n
+  
+  delay(200);
+  _deviceSettings();
+  
+  delay(200);
+  _requestSmsAtIndex(String("1"));
 }
 
-void _receiveTextMessage(String &line)
+void _requestSmsAtIndex(const String &index)
 {
-  int idx = line.indexOf(",");
-  String index = line.substring(idx+1, line.length()-2);
   gsmSerial.print("AT+CMGR=" + index + "\r");
 }
 
-boolean _is_new_sms(const String &line)
+void _receiveTextMessage(const String &line)
 {
-  return line.indexOf("+CMTI") != -1;
+  String index = line.substring(12);
+  index.trim();
+  debug("Got index " + index);
+  gsmSerial.flush();
+  _requestSmsAtIndex(index);
 }
 
-boolean _is_sms(const String &line)
+boolean _isNewSms(const String &line)
+{
+  // +CMTI: "SM",11
+  return line.indexOf("+CMTI") != -1 &&
+         line.length() > 12;
+}
+
+boolean _isSms(const String &line)
 {
   return line.indexOf("+CMGR") != -1;
 }
 
-boolean _print_sms(String &line)
+boolean _readAndPrintSms()
 {
-  int idx = line.substring(10).indexOf("\n");
-  String content = line.substring(idx);
-  debug("Got sms with content: " + content);
+  // Line contains the +CMGR response, now we need to read the message
+  byte charsRead = gsmSerial.readBytesUntil('\n', _gsmBuffer, _gsmMaxBuffer);
+  if(charsRead > 1)
+  {
+    charsRead--; // Skip newline
+    _gsmBuffer[charsRead] = 0; // Terminate string
+    debug("Message content" + String(_gsmBuffer));
+    _gsmReadBytesOrDisplayError(4); // OK\r\n
+    lcdPrintString(String(_gsmBuffer));
+  }
 }
 
-void _gsmSerialHandleLine()
+void _gsmSerialHandleLine(const String &s)
 {
-  String s = _gsmBuffer;
   debug(s);
 
   if(s.indexOf("+CPIN: SIM PIN") != -1)
   {
     _writePinCode();
   }
-  else if(_is_new_sms(s)) // +CMTI: "SM",1
+  else if(_isNewSms(s)) // +CMTI: "SM",1
   {
     _receiveTextMessage(s);
   }
-  else if(_is_sms(s)) // +CMTI: "SM",1
+  else if(_isSms(s)) // +CMGR: "REC READ","+358407075732","","12/02/22,17:58:00+08"
   {
-    _print_sms(s);
+    _readAndPrintSms();
   }
   else
   {
@@ -90,7 +120,7 @@ void gsmPollContent()
     if(charsRead)
     {
       _gsmBuffer[charsRead] = 0; // Terminate string
-      _gsmSerialHandleLine();
+      _gsmSerialHandleLine(String(_gsmBuffer));
     }
   }
 }
