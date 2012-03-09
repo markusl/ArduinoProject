@@ -33,7 +33,7 @@ EthernetClient client;
 
 /** Initializes attached ethernet shield, tries DHCP and
   * fallbacks to hard-coded interface settings. */
-void initializeEthernet()
+void initializeEthernet(void (*lcdUpdate)(const String&))
 {
   debug("initializeEthernet");
 

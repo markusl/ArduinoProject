@@ -40,14 +40,10 @@ void _writePinCode()
 {
   gsmSerial.write("AT+CPIN=7201\r");
   debug2("PIN code written");
-  delay(200);
   _gsmReadBytesOrDisplayError(4); // OK\r\n
   
   delay(200);
   _deviceSettings();
-  
-  delay(200);
-  _requestSmsAtIndex(String("1"));
 }
 
 void _requestSmsAtIndex(const String &index)
@@ -59,7 +55,6 @@ void _receiveTextMessage(const String &line)
 {
   String index = line.substring(12);
   index.trim();
-  debug("Got index " + index);
   gsmSerial.flush();
   _requestSmsAtIndex(index);
 }
@@ -67,25 +62,34 @@ void _receiveTextMessage(const String &line)
 boolean _isNewSms(const String &line)
 {
   // +CMTI: "SM",11
-  return line.indexOf("+CMTI") != -1 &&
+  return line.indexOf("+CMTI") == 0 &&
          line.length() > 12;
 }
 
 boolean _isSms(const String &line)
 {
-  return line.indexOf("+CMGR") != -1;
+  return line.indexOf("+CMGR") == 0;
+}
+boolean _isDeviceStartingUp(const String &line)
+{
+  return line.indexOf("+CPIN: SIM PIN") == 0;
+}
+boolean _isDeviceStartupComplete(const String &line)
+{
+  return line.indexOf("Call Ready") == 0;
 }
 
 boolean _readAndPrintSms()
 {
   // Line contains the +CMGR response, now we need to read the message
   byte charsRead = gsmSerial.readBytesUntil('\n', _gsmBuffer, _gsmMaxBuffer);
+  
   if(charsRead > 1)
   {
     charsRead--; // Skip newline
     _gsmBuffer[charsRead] = 0; // Terminate string
-    debug("Message content" + String(_gsmBuffer));
     _gsmReadBytesOrDisplayError(4); // OK\r\n
+    debug("sms" + String(_gsmBuffer));
     lcdPrintString(String(_gsmBuffer));
   }
 }
@@ -94,9 +98,13 @@ void _gsmSerialHandleLine(const String &s)
 {
   debug(s);
 
-  if(s.indexOf("+CPIN: SIM PIN") != -1)
+  if(_isDeviceStartingUp(s)) // +CPIN: SIM PIN
   {
     _writePinCode();
+  }
+  else if(_isDeviceStartupComplete(s)) // Call Ready
+  {
+    _requestSmsAtIndex(String("1"));
   }
   else if(_isNewSms(s)) // +CMTI: "SM",1
   {

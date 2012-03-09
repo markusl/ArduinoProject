@@ -10,7 +10,8 @@
  *
  */
  
- 
+
+/** TODO Markus - Currently no keypad support implemented */
 void initializeKeypad()
 {
 }
@@ -18,6 +19,7 @@ void initializeKeypad()
 void keypadPoll()
 {
 }
+
 /*
 #include <Keypad.h>
 
